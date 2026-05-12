@@ -21,12 +21,20 @@ import { useCurrentPlayerFrame } from "../hooks/use-current-frame";
 import { generateId } from "@designcombo/timeline";
 import { Loader2 } from "lucide-react";
 
+const CAPTION_LANGUAGE_OPTIONS = [
+  { label: "Thai", value: "TH" },
+  { label: "English", value: "EN" },
+  { label: "Spanish", value: "ES" },
+  { label: "Japanese", value: "JA" }
+];
+
 export const Captions = () => {
   const { trackItemsMap } = useStore();
   const [selectMediaItems, setSelectMediaItems] = useState<
     { label: string; value: string }[]
   >([]);
   const [selectedMedia, setSelectedMedia] = useState<string | undefined>();
+  const [selectedLanguage, setSelectedLanguage] = useState("TH");
   const [captionTrackItemsMap, setCaptionTrackItemsMap] = useState<
     Record<string, ITrackItem[]>
   >({});
@@ -57,7 +65,10 @@ export const Captions = () => {
     setSelectedMedia(value);
   };
 
-  const createCaptions = async (selectedMedia: string) => {
+  const createCaptions = async (
+    selectedMedia: string,
+    targetLanguage: string
+  ) => {
     setIsGenerating(true);
     try {
       const trackItem = mediaTrackItems.find(
@@ -68,7 +79,7 @@ export const Captions = () => {
         throw new Error("Track item not found");
       }
 
-      const { url } = await transcribeMedia(selectedMedia, "ES");
+      const { url } = await transcribeMedia(selectedMedia, targetLanguage);
       const jsonData = await fetchJsonFromUrl(url);
       const fontInfo = {
         fontFamily: "theboldfont",
@@ -119,7 +130,9 @@ export const Captions = () => {
         <MediaSection
           selectMediaItems={selectMediaItems}
           selectedMedia={selectedMedia}
+          selectedLanguage={selectedLanguage}
           onSelectChange={handleSelectChange}
+          onLanguageChange={setSelectedLanguage}
           captionTrackItemsMap={captionTrackItemsMap}
           createCaptions={createCaptions}
           isGenerating={isGenerating}
@@ -132,16 +145,20 @@ export const Captions = () => {
 const MediaSection = ({
   selectMediaItems,
   selectedMedia,
+  selectedLanguage,
   onSelectChange,
+  onLanguageChange,
   captionTrackItemsMap,
   createCaptions,
   isGenerating
 }: {
   selectMediaItems: { label: string; value: string }[];
   selectedMedia: string | undefined;
+  selectedLanguage: string;
   onSelectChange: (value: string) => void;
+  onLanguageChange: (value: string) => void;
   captionTrackItemsMap: Record<string, ITrackItem[]>;
-  createCaptions: (selectedMedia: string) => void;
+  createCaptions: (selectedMedia: string, targetLanguage: string) => void;
   isGenerating: boolean;
 }) => (
   <div className="flex h-[calc(100%-4.5rem)] flex-col gap-4 px-4">
@@ -151,6 +168,19 @@ const MediaSection = ({
       </SelectTrigger>
       <SelectContent className="z-[200]">
         {selectMediaItems.map((item) => (
+          <SelectItem value={item.value} key={item.value}>
+            {item.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+
+    <Select value={selectedLanguage} onValueChange={onLanguageChange}>
+      <SelectTrigger className="w-full">
+        <SelectValue placeholder="Select caption language" />
+      </SelectTrigger>
+      <SelectContent className="z-[200]">
+        {CAPTION_LANGUAGE_OPTIONS.map((item) => (
           <SelectItem value={item.value} key={item.value}>
             {item.label}
           </SelectItem>
@@ -169,7 +199,7 @@ const MediaSection = ({
         </div>
       ) : (
         <MediaWithNoCaptions
-          createCaptions={() => createCaptions(selectedMedia)}
+          createCaptions={() => createCaptions(selectedMedia, selectedLanguage)}
           isGenerating={isGenerating}
         />
       )

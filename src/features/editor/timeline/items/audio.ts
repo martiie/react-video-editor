@@ -26,6 +26,14 @@ interface AudioProps extends TrimmableProps {
   };
 }
 
+const isIgnorableAudioDecodeError = (error: unknown) => {
+  return (
+    error instanceof Error &&
+    (error.name === "EncodingError" ||
+      error.message.includes("Unable to decode audio data"))
+  );
+};
+
 class Audio extends Trimmable {
   static type = "Audio";
   public barData?: AudioData;
@@ -93,11 +101,22 @@ class Audio extends Trimmable {
   }
 
   private async initialize() {
-    const audioData = await getAudioData(this.src);
-    this.barData = audioData;
-    this.bars = this.getBars(0, 0) as any;
-    this.canvas?.requestRenderAll();
-    this.onScrollChange({ scrollLeft: 0 });
+    try {
+      const audioData = await getAudioData(this.src);
+      this.barData = audioData;
+      this.bars = this.getBars(0, 0) as any;
+      this.canvas?.requestRenderAll();
+      this.onScrollChange({ scrollLeft: 0 });
+    } catch (error) {
+      if (isIgnorableAudioDecodeError(error)) {
+        this.barData = undefined;
+        this.bars = [];
+        this.canvas?.requestRenderAll();
+        return;
+      }
+
+      console.error(`Failed to initialize audio waveform for ${this.src}:`, error);
+    }
   }
 
   public setSrc(src: string) {

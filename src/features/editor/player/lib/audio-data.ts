@@ -7,12 +7,21 @@ interface AudioDataCache {
   lastAccessed: number;
 }
 
+const isIgnorableAudioDecodeError = (error: unknown) => {
+  return (
+    error instanceof Error &&
+    (error.name === "EncodingError" ||
+      error.message.includes("Unable to decode audio data"))
+  );
+};
+
 export class AudioDataManager {
   private fps = 30;
   private numberOfSamples = 512;
   public dataBars: number[] = [];
   public items: (ITrackItem & (IVideo | IAudio))[] = [];
   private audioDatas: { [key: string]: AudioDataCache } = {};
+  private failedAudioIds = new Set<string>();
   private readonly MAX_CACHE_SIZE = 10;
   private frameCache: Map<number, number[]> = new Map();
   private readonly CACHE_TTL = 1000 * 60 * 5; // 5 minutes
@@ -22,6 +31,10 @@ export class AudioDataManager {
   }
 
   private async loadAudioData(src: string, id: string): Promise<void> {
+    if (this.failedAudioIds.has(id)) {
+      return;
+    }
+
     try {
       console.log("Loading audio data for", src);
       const data = await getAudioData(src);
@@ -29,17 +42,16 @@ export class AudioDataManager {
         data,
         lastAccessed: Date.now()
       };
+      this.failedAudioIds.delete(id);
       this.cleanupCache();
     } catch (error) {
-      console.error(`Error loading audio data for ${src}:`, error);
-
-      // If it's an EncodingError (no audio track), just ignore it
-      if (error instanceof Error && error.name === "EncodingError") {
-        console.log(`No audio track found for ${src}, ignoring`);
+      if (isIgnorableAudioDecodeError(error)) {
+        console.warn(`Skipping audio waveform for ${src}: audio could not be decoded`);
+        this.failedAudioIds.add(id);
         return;
       }
 
-      // For other errors, still throw them
+      console.error(`Error loading audio data for ${src}:`, error);
       throw error;
     }
   }
@@ -107,6 +119,7 @@ export class AudioDataManager {
 
   public removeItem(id: string) {
     delete this.audioDatas[id];
+    this.failedAudioIds.delete(id);
     this.frameCache.clear(); // Clear frame cache when items are removed
   }
 
