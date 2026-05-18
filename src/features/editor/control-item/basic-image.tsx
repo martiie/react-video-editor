@@ -15,6 +15,7 @@ import Brightness from "./common/brightness";
 import useLayoutStore from "../store/use-layout-store";
 import { Label } from "@/components/ui/label";
 import { Animations } from "./common/animations";
+import ImageMotion from "./common/image-motion";
 
 const BasicImage = ({
   trackItem,
@@ -227,6 +228,10 @@ const BasicImage = ({
     {
       key: "animations",
       component: <Animations trackItem={trackItem} properties={properties} />
+    },
+    {
+      key: "motion",
+      component: <ImageMotion trackItem={trackItem} />
     },
 
     {

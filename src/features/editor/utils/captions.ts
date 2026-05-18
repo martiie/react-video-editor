@@ -128,7 +128,9 @@ function createCaptionLines(
     }
 
     // Accumulate words and width for the current line
-    currentLine.text += (currentLine.text ? " " : "") + wordObj.word;
+    // Thai script has no spaces between words
+    const separator = options.language === "TH" ? "" : " ";
+    currentLine.text += (currentLine.text ? separator : "") + wordObj.word;
     currentLine.words.push(wordObj);
     currentLine.width += wordWidth;
     currentLine.end = wordObj.end;
@@ -152,6 +154,7 @@ interface Options {
   linesPerCaption: number;
   parentId: string;
   displayFrom: number;
+  language?: string;
 }
 
 export function generateCaptions(

@@ -81,16 +81,25 @@ export const Captions = () => {
 
       const { url } = await transcribeMedia(selectedMedia, targetLanguage);
       const jsonData = await fetchJsonFromUrl(url);
-      const fontInfo = {
-        fontFamily: "theboldfont",
-        fontUrl: "https://cdn.designcombo.dev/fonts/the-bold-font.ttf",
-        fontSize: 64
-      };
+      const isThai = targetLanguage === "TH";
+      const fontInfo = isThai
+        ? {
+            fontFamily: "Sarabun",
+            fontUrl:
+              "https://fonts.gstatic.com/s/sarabun/v13/DtVjJx26TKEr37c9YOZqulwm6gDXvwE.ttf",
+            fontSize: 64
+          }
+        : {
+            fontFamily: "theboldfont",
+            fontUrl: "https://cdn.designcombo.dev/fonts/the-bold-font.ttf",
+            fontSize: 64
+          };
       const options = {
         containerWidth: 800,
         linesPerCaption: 1,
         parentId: trackItem.id,
-        displayFrom: trackItem.display.from
+        displayFrom: trackItem.display.from,
+        language: targetLanguage
       };
 
       await loadFonts([{ name: fontInfo.fontFamily, url: fontInfo.fontUrl }]);

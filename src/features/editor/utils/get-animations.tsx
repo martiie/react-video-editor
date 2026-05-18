@@ -5,6 +5,7 @@ import {
 } from "@designcombo/types";
 import { Easing } from "remotion";
 import { Animation } from "../player/animated";
+import { resolveEasingFn } from "./image-animation";
 
 export const getAnimations = (
   animation: {
@@ -61,6 +62,15 @@ export const getAnimations = (
         });
       }
     });
+  }
+  if (animation?.timed) {
+    animationTimed = animation.timed.composition.map((comp) => ({
+      property: comp.property,
+      from: comp.from,
+      to: comp.to,
+      durationInFrames: comp.durationInFrames,
+      ease: resolveEasingFn(comp.easing)
+    }));
   }
   return {
     animationIn,
