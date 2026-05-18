@@ -13,6 +13,8 @@ import BasicImage from "./basic-image";
 import BasicVideo from "./basic-video";
 import BasicAudio from "./basic-audio";
 import BasicCaption from "./basic-caption";
+import BasicDraw from "./basic-draw";
+import { IDrawItem } from "../player/items/draw";
 import { MenuItem } from "../menu-item";
 import useStore from "../store/use-store";
 import useLayoutStore from "../store/use-layout-store";
@@ -35,8 +37,9 @@ const ActiveControlItem = ({
           ),
           image: <BasicImage trackItem={trackItem as ITrackItem & IImage} />,
           video: <BasicVideo trackItem={trackItem as ITrackItem & IVideo} />,
-          audio: <BasicAudio trackItem={trackItem as ITrackItem & IAudio} />
-        }[trackItem.type as "text"]
+          audio: <BasicAudio trackItem={trackItem as ITrackItem & IAudio} />,
+          draw: <BasicDraw trackItem={trackItem as unknown as IDrawItem} />
+        }[trackItem.type as string]
       }
     </>
   );

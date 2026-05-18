@@ -7,6 +7,7 @@ import Board from "./board";
 import useZoom from "../hooks/use-zoom";
 import { SceneInteractions } from "./interactions";
 import { SceneRef } from "./scene.types";
+import DrawCanvas from "./draw-canvas";
 
 const Scene = forwardRef<
   SceneRef,
@@ -71,6 +72,7 @@ const Scene = forwardRef<
             zoom={zoom}
             size={size}
           />
+          <DrawCanvas zoom={zoom} size={size} />
         </Board>
       </div>
     </div>

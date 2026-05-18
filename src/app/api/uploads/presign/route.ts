@@ -1,21 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import mime from "mime-types";
+import path from "path";
 
 interface PresignRequest {
   userId: string;
   fileNames: string[];
-}
-
-interface ExternalPresignResponse {
-  fileName: string;
-  filePath: string;
-  contentType: string;
-  presignedUrl: string;
-  folder?: string;
-  url: string;
-}
-
-interface ExternalPresignsResponse {
-  uploads: ExternalPresignResponse[];
 }
 
 export async function POST(request: NextRequest) {
@@ -37,40 +26,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Call external presigned URL service
-    const externalResponse = await fetch(
-      "https://upload-file-j43uyuaeza-uc.a.run.app/presigned",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          userId,
-          fileNames
-        })
-      }
-    );
+    const uploads = fileNames.map((fileName) => {
+      const ext = path.extname(fileName);
+      const base = path.basename(fileName, ext);
+      const unique = `${base}-${Date.now()}${ext}`;
+      const filePath = `uploads/${userId}/${unique}`;
+      const contentType =
+        (mime.lookup(fileName) as string | false) || "application/octet-stream";
 
-    if (!externalResponse.ok) {
-      const errorData = await externalResponse.json();
-      return NextResponse.json(
-        {
-          error: "External presigned URL service failed",
-          details: errorData
-        },
-        { status: externalResponse.status }
-      );
-    }
-
-    const externalData: ExternalPresignsResponse =
-      await externalResponse.json();
-    const { uploads = [] } = externalData;
-
-    return NextResponse.json({
-      success: true,
-      uploads: uploads
+      return {
+        fileName: unique,
+        filePath,
+        contentType,
+        // Local PUT endpoint — Next.js will save the raw body to public/
+        presignedUrl: `/api/uploads/write?filePath=${encodeURIComponent(filePath)}`,
+        url: `/${filePath}`
+      };
     });
+
+    return NextResponse.json({ success: true, uploads });
   } catch (error) {
     console.error("Error in presign route:", error);
     return NextResponse.json(

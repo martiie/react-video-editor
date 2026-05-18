@@ -20,6 +20,12 @@ import {
 // Define menu items configuration for better maintainability
 const MENU_ITEMS = [
   {
+    id: "templates",
+    icon: Icons.templates,
+    label: "Templates",
+    ariaLabel: "Browse and apply video templates"
+  },
+  {
     id: "uploads",
     icon: Icons.upload,
     label: "Uploads",
@@ -72,6 +78,12 @@ const MENU_ITEMS = [
     icon: Icons.sfx,
     label: "SFX",
     ariaLabel: "Generate SFX from text"
+  },
+  {
+    id: "draw",
+    icon: Icons.pen,
+    label: "Draw",
+    ariaLabel: "Draw on canvas"
   }
 ] as const;
 

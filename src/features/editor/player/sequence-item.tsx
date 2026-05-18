@@ -18,6 +18,7 @@ import {
 import {
   Audio,
   Caption,
+  DrawItem,
   HillAudioBars,
   Illustration,
   Image,
@@ -30,6 +31,7 @@ import {
   Video,
   WaveAudioBars
 } from "./items";
+import { IDrawItem } from "./items/draw";
 import { SequenceItemOptions } from "./base-sequence";
 
 export const SequenceItem: Record<
@@ -55,5 +57,6 @@ export const SequenceItem: Record<
   progressFrame: (item, options) =>
     ProgressFrame({ item: item as IProgressFrame, options }),
   radialAudioBars: (item, options) =>
-    RadialAudioBars({ item: item as IRadialAudioBars, options })
+    RadialAudioBars({ item: item as IRadialAudioBars, options }),
+  draw: (item, options) => DrawItem({ item: item as unknown as IDrawItem, options })
 };

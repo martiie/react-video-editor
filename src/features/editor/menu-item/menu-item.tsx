@@ -11,10 +11,15 @@ import { useIsLargeScreen } from "@/hooks/use-media-query";
 import { Uploads } from "./uploads";
 import { AiVoice } from "./ai-voice";
 import { SFX } from "./sfx";
+import { Templates } from "./templates";
+import { DrawTool } from "./draw-tool";
 
 const ActiveMenuItem = () => {
   const { activeMenuItem } = useLayoutStore();
 
+  if (activeMenuItem === "templates") {
+    return <Templates />;
+  }
   if (activeMenuItem === "transitions") {
     return <Transitions />;
   }
@@ -55,6 +60,10 @@ const ActiveMenuItem = () => {
 
   if (activeMenuItem === "sfx") {
     return <SFX />;
+  }
+
+  if (activeMenuItem === "draw") {
+    return <DrawTool />;
   }
 
   return null;
